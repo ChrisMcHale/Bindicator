@@ -1,4 +1,4 @@
-import requests, scrollphathd
+import requests, scrollphathd as sphd, time
 from requests import HTTPError
 
 URL = "https://mycouncil.northampton.digital/BinRoundFinder?postcode="
@@ -10,14 +10,25 @@ def get_bin_collection_data(postcode):
         response = requests.get(url_to_get)
         response.raise_for_status()
         json_response = response.json()
-        print(json_response)
-        scrollphathd.write_string("blaj", x=0, y=0, font=None, letter_spacing=1, brightness=1.0)
-        scrollphathd.show()
-
+        type_string = json_response["type"]
+        if type_string == "brown":
+            type_string = "Garden & Recycling"
+        if type_string == "black":
+            type_string = "General Rubbish"
+        show_on_display(json_response["day"] + " : " + type_string)
     except HTTPError as http_err:
         print(f'HTTP Error Occurred: {http_err}')
     except Exception as err:
         print(f'Error Occurred: {err}')
+
+
+def show_on_display(string):
+    sphd.rotate(180)
+    sphd.write_string(string + " ")
+    while True:
+        sphd.show()
+        sphd.scroll(1)
+        time.sleep(0.05)
 
 
 def parse_postcode(postcode):
@@ -33,4 +44,4 @@ def parse_json(json):
 
 
 if __name__ == "__main__":
-    get_bin_collection_data(" NN4 9fa")
+    get_bin_collection_data(" NN49fa")
