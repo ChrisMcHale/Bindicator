@@ -1,35 +1,17 @@
-import requests, scrollphathd as sphd, time
-from requests import HTTPError
-
-URL = "https://mycouncil.northampton.digital/BinRoundFinder?postcode="
-
+import postcodeTools as pcT
+import councilInformation as cI
+import councils.northampton as northampton
 
 def get_bin_collection_data(postcode):
-    try:
-        url_to_get = URL + parse_postcode(postcode)
-        response = requests.get(url_to_get)
-        response.raise_for_status()
-        json_response = response.json()
-        type_string = json_response["type"]
-        if type_string == "brown":
-            type_string = "Garden & Recycling"
-        if type_string == "black":
-            type_string = "General Rubbish"
-        show_on_display(json_response["day"] + " : " + type_string)
-    except HTTPError as http_err:
-        print(f'HTTP Error Occurred: {http_err}')
-    except Exception as err:
-        print(f'Error Occurred: {err}')
-
-
-def show_on_display(string):
-    sphd.rotate(180)
-    sphd.write_string(string + " ")
-    while True:
-        sphd.show()
-        sphd.scroll(1)
-        time.sleep(0.05)
-
+    postcode_response = pcT.get_all_postcode_data(parse_postcode(postcode))
+    postcode_json = postcode_response.json()
+    admin_district = postcode_json["result"]["admin_district"]
+    if not admin_district:
+        print(f"Unable to locate council for postcode {postcode}")
+    else:
+        print(f"Council for postcode {postcode} is {admin_district}")
+    print(f"The URL for {admin_district} is {cI.get_council_bin_url(admin_district)}")
+    print(f"Your bin collection is {northampton.get_bin_collection_data(cI.get_council_bin_url(admin_district), postcode)}")
 
 def parse_postcode(postcode):
     pc = postcode
@@ -44,4 +26,4 @@ def parse_json(json):
 
 
 if __name__ == "__main__":
-    get_bin_collection_data(" NN49fa")
+    get_bin_collection_data("nn49fa")
