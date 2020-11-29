@@ -13,10 +13,13 @@ def get_all_postcode_data(postcode):
     except HTTPError as http_err:
         if response.status_code == 404:
             print(f'Sorry, the postcode {postcode} does not exist')
+            exit(404)
         if response.status_code == 400:
             print(f'HTTP Error {http_err} - Bad Request')
+            exit(400)
         if response.status_code == 500:
             print(f'HTTP Error {http_err} - Server Error')
+            exit(500)
         else:
             print(f'HTTP Error {http_err}')
     except Exception as err:
